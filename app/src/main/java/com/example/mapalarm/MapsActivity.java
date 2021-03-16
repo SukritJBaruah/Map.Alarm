@@ -11,13 +11,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.SyncStateContract;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -30,6 +34,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -40,6 +46,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     FusedLocationProviderClient client;
+    private LatLng currentLoc;
+    private Circle mapCircle;
+    private Float triggerRadius;
+
+    private EditText triggerRadiusText;
 
     //initialization of saved last trigger location
     private SharedPreferences.Editor edit;
@@ -53,12 +64,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         edit = preferenceSettings.edit();
         triggerLoc = new LatLng(preferenceSettings.getFloat("trigLat", (float) 26.585), preferenceSettings.getFloat("trigLong", (float) 93.168));
 
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        //text space
+        triggerRadiusText = (EditText) findViewById(R.id.triggerRadius5);
+        triggerRadiusText.setText(String.valueOf(preferenceSettings.getFloat("triggerRadius", 0)));
+        triggerRadiusText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().equals("")) {
+                    triggerRadius = (float) 0;
+                }else{
+                    triggerRadius = Float.parseFloat(s.toString());
+                }
+                edit.putFloat("triggerRadius", triggerRadius);
+                edit.apply();
+                Log.v("trigger Radius", String.valueOf(preferenceSettings.getFloat("triggerRadius", 0)));
+
+                //draw circle
+                if(mapCircle!=null){
+                    mapCircle.remove();
+                }
+                mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+            }
+        });
 
 
         //switch
@@ -108,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                LatLng currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
+                currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(currentLoc).title("I'm here").draggable(false).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 10));
 
@@ -164,6 +208,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        //draw circle
+        triggerRadius = new Float(preferenceSettings.getFloat("triggerRadius", 0));
+        if(mapCircle!=null){
+            mapCircle.remove();
+        }
+        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+
         //fused location
         client = LocationServices.getFusedLocationProviderClient(this);
 
@@ -184,6 +235,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void onMarkerDragStart(Marker marker) {
+                if(mapCircle!=null){
+                    mapCircle.remove();
+                }
                 Toast.makeText(MapsActivity.this, "Dragging Start",
                         Toast.LENGTH_SHORT).show();
             }
@@ -201,12 +255,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         "Lat " + triggerLoc.latitude + " "
                                 + "Long " + triggerLoc.longitude,
                         Toast.LENGTH_LONG).show();
+                //draw circle
+                mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
             }
 
             @Override
-            public void onMarkerDrag(Marker marker) {
-                System.out.println("Dragging");
-            }
+            public void onMarkerDrag(Marker marker) { }
         });
 
 
