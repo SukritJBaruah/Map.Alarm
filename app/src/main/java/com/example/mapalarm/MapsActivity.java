@@ -9,6 +9,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -39,8 +41,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     FusedLocationProviderClient client;
 
+    //initialization of saved last trigger location
+    private SharedPreferences.Editor edit;
+    private SharedPreferences preferenceSettings;
+    private LatLng triggerLoc;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        preferenceSettings = getSharedPreferences("Test", Context.MODE_PRIVATE);
+        edit = preferenceSettings.edit();
+        triggerLoc = new LatLng(preferenceSettings.getFloat("trigLat", (float) 26.585), preferenceSettings.getFloat("trigLong", (float) 93.168));
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -65,6 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         ActivityCompat.requestPermissions(MapsActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                     }else{
                         startLocationService();
+                        Log.v("Trigger Location=", " "+ triggerLoc.latitude + " " + triggerLoc.longitude);
                     }
                 }
                 if(isChecked == false){
@@ -165,8 +178,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Add a marker in Sydney and move the camera
-        final LatLng trigLoc = new LatLng(26.585, 93.168);
-        mMap.addMarker(new MarkerOptions().position(trigLoc).title("Trigger location").draggable(true));
+        mMap.addMarker(new MarkerOptions().position(triggerLoc).title("Trigger location").draggable(true));
+
+        mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+
+            @Override
+            public void onMarkerDragStart(Marker marker) {
+                Toast.makeText(MapsActivity.this, "Dragging Start",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                triggerLoc = marker.getPosition();
+
+                edit.putFloat("trigLat", (float) triggerLoc.latitude);
+                edit.putFloat("trigLong", (float) triggerLoc.longitude);
+                edit.apply();
+
+                Toast.makeText(
+                        MapsActivity.this,
+                        "Lat " + triggerLoc.latitude + " "
+                                + "Long " + triggerLoc.longitude,
+                        Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onMarkerDrag(Marker marker) {
+                System.out.println("Dragging");
+            }
+        });
+
+
     }
 
     @Override
