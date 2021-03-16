@@ -1,11 +1,19 @@
 package com.example.mapalarm;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
@@ -13,14 +21,31 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class LocationService extends Service{
+
+    private float distance;
+    private static int speed = 25;
+    private int refreshTime = 5000;
+    private Location destinationLoc1 = new Location("");
+    private Location currentLoc1 = new Location("");
+    private LocationRequest locationRequest;
+    public static MediaPlayer mp = new MediaPlayer();
+
+    private SharedPreferences.Editor edit;
+    private SharedPreferences preferenceSettings;
 
     private LocationCallback locationCallback = new LocationCallback() {
         @Override
@@ -31,8 +56,66 @@ public class LocationService extends Service{
                 double latitude = locationResult.getLastLocation().getLatitude();
                 double longitude = locationResult.getLastLocation().getLongitude();
                 //debug
-                Log.v("Location Update", latitude + ", " + longitude);
+                //Log.v("Location Update", latitude + ", " + longitude);
 
+
+                //Main algorithm
+                preferenceSettings = getSharedPreferences("Test", Context.MODE_PRIVATE);
+                edit = preferenceSettings.edit();
+
+                destinationLoc1.setLatitude(preferenceSettings.getFloat("trigLat", (float) 26.585));
+                destinationLoc1.setLongitude(preferenceSettings.getFloat("trigLong", (float) 93.168));
+
+                currentLoc1.setLatitude(latitude);
+                currentLoc1.setLongitude(longitude);
+
+                distance = destinationLoc1.distanceTo(currentLoc1);
+
+
+                //alarm sound
+                if(distance <= preferenceSettings.getFloat("triggerRadius", 0)){
+                    Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                    if (alarmUri == null) {
+                        alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    }
+
+                    if (alarmUri == null) {
+                        Log.e("ringAlarm" , "alarmUri null. Unable to get default sound URI");
+                        return;
+                    }
+
+                    // This is what sets the media type as alarm
+                    // Thus, the sound will be influenced by alarm volume
+                    mp.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM).build());
+
+                    try {
+                        mp.setDataSource(getApplicationContext(), alarmUri);
+                        mp.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // To continuously loop the alarm sound
+                    mp.setLooping(true);
+                    mp.start();
+                    stopLocationService();
+                }
+
+
+
+
+
+                refreshTime = (int) ((distance/speed) * 1000)/2;
+
+                /*new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+
+                    }
+                }, refreshTime);*/
+
+                Log.v("Destination distance", String.valueOf(distance) + " Time/2: " + refreshTime/1000);
 
             }
         }
@@ -43,6 +126,7 @@ public class LocationService extends Service{
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not implemented yet");
     }
+
 
     private void startLocationService(){
         String channelId = "location_notification_channel";
@@ -69,9 +153,9 @@ public class LocationService extends Service{
             }
         }
 
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(3000);
+        locationRequest = new LocationRequest();
+        locationRequest.setInterval(refreshTime);
+        locationRequest.setFastestInterval(refreshTime - 2000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());

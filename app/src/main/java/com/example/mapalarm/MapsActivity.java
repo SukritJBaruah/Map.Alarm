@@ -94,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 edit.putFloat("triggerRadius", triggerRadius);
                 edit.apply();
-                Log.v("trigger Radius", String.valueOf(preferenceSettings.getFloat("triggerRadius", 0)));
+                //Log.v("trigger Radius", String.valueOf(preferenceSettings.getFloat("triggerRadius", 0)));
 
                 //draw circle
                 if(mapCircle!=null){
@@ -116,17 +116,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked == true){
-                    Log.v("Switch State=", ""+isChecked);
+                    //Log.v("Switch State=", ""+isChecked);
                     if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
                         ActivityCompat.requestPermissions(MapsActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                     }else{
                         startLocationService();
-                        Log.v("Trigger Location=", " "+ triggerLoc.latitude + " " + triggerLoc.longitude);
+                        //Log.v("Trigger Location=", " "+ triggerLoc.latitude + " " + triggerLoc.longitude);
                     }
                 }
                 if(isChecked == false){
-                    Log.v("Switch State=", ""+isChecked);
+                    //Log.v("Switch State=", ""+isChecked);
                     stopLocationService();
+                    if(LocationService.mp.isPlaying()){
+                        LocationService.mp.stop();
+                        LocationService.mp.reset();
+                    }
                 }
             }
         });
@@ -238,8 +242,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(mapCircle!=null){
                     mapCircle.remove();
                 }
-                Toast.makeText(MapsActivity.this, "Dragging Start",
-                        Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MapsActivity.this, "Dragging Start", Toast.LENGTH_SHORT).show();
             }
 
             @Override

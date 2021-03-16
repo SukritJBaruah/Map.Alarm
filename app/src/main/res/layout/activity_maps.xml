@@ -30,7 +30,7 @@
             android:layout_margin="5dp"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="textPersonName"
+            android:inputType="numberDecimal"
             android:hint="Trigger radius"
             android:textSize="15sp" />
 
