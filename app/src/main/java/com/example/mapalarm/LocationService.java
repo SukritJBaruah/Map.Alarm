@@ -1,6 +1,6 @@
 package com.example.mapalarm;
 
-import android.Manifest;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,7 +8,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
@@ -19,11 +18,9 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
+
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -37,7 +34,6 @@ import java.util.TimerTask;
 public class LocationService extends Service{
 
     private float distance;
-    private static int speed = 25;
     private int refreshTime = 5000;
     private Location destinationLoc1 = new Location("");
     private Location currentLoc1 = new Location("");
@@ -53,8 +49,8 @@ public class LocationService extends Service{
             super.onLocationResult(locationResult);
             if(locationResult != null && locationResult.getLastLocation() != null)
             {
-                double latitude = locationResult.getLastLocation().getLatitude();
-                double longitude = locationResult.getLastLocation().getLongitude();
+                //double latitude = locationResult.getLastLocation().getLatitude();
+                //double longitude = locationResult.getLastLocation().getLongitude();
                 //debug
                 //Log.v("Location Update", latitude + ", " + longitude);
 
@@ -66,8 +62,8 @@ public class LocationService extends Service{
                 destinationLoc1.setLatitude(preferenceSettings.getFloat("trigLat", (float) 26.585));
                 destinationLoc1.setLongitude(preferenceSettings.getFloat("trigLong", (float) 93.168));
 
-                currentLoc1.setLatitude(latitude);
-                currentLoc1.setLongitude(longitude);
+                currentLoc1.setLatitude(locationResult.getLastLocation().getLatitude());
+                currentLoc1.setLongitude(locationResult.getLastLocation().getLongitude());
 
                 distance = destinationLoc1.distanceTo(currentLoc1);
 
@@ -105,21 +101,33 @@ public class LocationService extends Service{
 
 
 
+                //distance/speed in m/s
+                //((distance/20) * 1000)/2 =
+                refreshTime = (int) (distance*25);
 
-                refreshTime = (int) ((distance/speed) * 1000)/2;
-
-                /*new Timer().schedule(new TimerTask() {
+                stploctemp();
+                new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
-
+                        strtloctemp();
                     }
-                }, refreshTime);*/
+                }, refreshTime);
 
                 Log.v("Destination distance", String.valueOf(distance) + " Time/2: " + refreshTime/1000);
 
             }
         }
     };
+
+    //Maybe a bad way to make update location varying, check this later
+    private void stploctemp(){
+        LocationServices.getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
+    }
+    private void strtloctemp(){
+        locationRequest.setInterval(refreshTime);
+        locationRequest.setFastestInterval(refreshTime - 2000);
+        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+    }
 
     @Nullable
     @Override

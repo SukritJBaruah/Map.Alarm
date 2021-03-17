@@ -14,11 +14,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -26,7 +24,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.google.android.gms.common.internal.Constants;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -49,6 +47,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng currentLoc;
     private Circle mapCircle;
     private Float triggerRadius;
+    private Marker redMarker;
+
 
     private EditText triggerRadiusText;
 
@@ -186,6 +186,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             intent.setAction("startLocationService");
             startService(intent);
             Toast.makeText(this, "Location service started", Toast.LENGTH_SHORT).show();
+            redMarker.remove();
+            redMarker = mMap.addMarker(new MarkerOptions().position(triggerLoc).title("Trigger location").draggable(false));
         }
     }
 
@@ -195,6 +197,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             intent.setAction("stopLocationService");
             startService(intent);
             Toast.makeText(this, "Location service stopped", Toast.LENGTH_SHORT).show();
+            redMarker.remove();
+            redMarker = mMap.addMarker(new MarkerOptions().position(triggerLoc).title("Trigger location").draggable(true));
         }
     }
 
@@ -233,7 +237,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Add a marker in Sydney and move the camera
-        mMap.addMarker(new MarkerOptions().position(triggerLoc).title("Trigger location").draggable(true));
+        redMarker = mMap.addMarker(new MarkerOptions().position(triggerLoc).title("Trigger location").draggable(isLocationServiceRunning() ? false : true));
 
         mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
 
