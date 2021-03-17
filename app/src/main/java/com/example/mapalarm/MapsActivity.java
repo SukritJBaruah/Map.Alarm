@@ -106,7 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //switch
-        if(isLocationServiceRunning()){
+        if(isLocationServiceRunning() || LocationService.mp.isPlaying()){
             Switch mySwitch = (Switch) findViewById(R.id.switch2);
             mySwitch.setChecked(true);
         }
