@@ -38,7 +38,7 @@ public class LocationService extends Service{
     private Location destinationLoc1 = new Location("");
     private Location currentLoc1 = new Location("");
     private LocationRequest locationRequest;
-    public static MediaPlayer mp = new MediaPlayer();
+    public static MediaPlayer mp;
 
     private SharedPreferences.Editor edit;
     private SharedPreferences preferenceSettings;
@@ -82,6 +82,7 @@ public class LocationService extends Service{
 
                     // This is what sets the media type as alarm
                     // Thus, the sound will be influenced by alarm volume
+                    mp = new MediaPlayer();
                     mp.setAudioAttributes(new AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_ALARM).build());
 
@@ -105,13 +106,16 @@ public class LocationService extends Service{
                 //((distance/20) * 1000)/2 =
                 refreshTime = (int) (distance*25);
 
-                stploctemp();
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        strtloctemp();
-                    }
-                }, refreshTime);
+                if(mp != null ? !mp.isPlaying() : false){
+                    stploctemp();
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            strtloctemp();
+                        }
+                    }, refreshTime);
+                }
+
 
                 Log.v("Destination distance", String.valueOf(distance) + " Time/2: " + refreshTime/1000);
 
@@ -125,7 +129,6 @@ public class LocationService extends Service{
     }
     private void strtloctemp(){
         locationRequest.setInterval(refreshTime);
-        locationRequest.setFastestInterval(refreshTime - 2000);
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 

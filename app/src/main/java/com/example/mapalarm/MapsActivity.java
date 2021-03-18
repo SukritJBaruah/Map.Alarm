@@ -106,7 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //switch
-        if(isLocationServiceRunning() || LocationService.mp.isPlaying()){
+        if(isLocationServiceRunning() || (LocationService.mp != null ? LocationService.mp.isPlaying() : false)){
             Switch mySwitch = (Switch) findViewById(R.id.switch2);
             mySwitch.setChecked(true);
         }
@@ -127,9 +127,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(isChecked == false){
                     //Log.v("Switch State=", ""+isChecked);
                     stopLocationService();
-                    if(LocationService.mp.isPlaying()){
+                    if(LocationService.mp != null ? LocationService.mp.isPlaying() : false){
                         LocationService.mp.stop();
-                        LocationService.mp.reset();
+                        LocationService.mp.release();
                     }
                 }
             }
