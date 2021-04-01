@@ -8,22 +8,26 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -59,9 +63,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private SharedPreferences preferenceSettings;
     private LatLng triggerLoc;
 
+    Dialog myDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        myDialog = new Dialog(this);
         preferenceSettings = getSharedPreferences("Test", Context.MODE_PRIVATE);
         edit = preferenceSettings.edit();
         triggerLoc = new LatLng(preferenceSettings.getFloat("trigLat", (float) 26.585), preferenceSettings.getFloat("trigLong", (float) 93.168));
@@ -153,6 +160,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
         //set the spinners adapter to the previously created one.
         dropdown.setAdapter(adapter);
+
+
 
     }
 
@@ -298,4 +307,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+
+    public void ShowPopUp(View v){
+        TextView txtclose;
+        myDialog.setContentView(R.layout.settings_popup);
+        txtclose = (TextView) myDialog.findViewById(R.id.popupclose);
+
+        txtclose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+            }
+        });
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.setCanceledOnTouchOutside(false);
+        myDialog.setCancelable(false);
+        myDialog.show();
+    }
+
 }
