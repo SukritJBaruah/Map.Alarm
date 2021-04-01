@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -127,9 +129,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(isChecked == false){
                     //Log.v("Switch State=", ""+isChecked);
                     stopLocationService();
+                    if(LocationService.mp != null ? !LocationService.mp.isPlaying() : false){
+                        LocationService.mp.reset();
+                    }
                     if(LocationService.mp != null ? LocationService.mp.isPlaying() : false){
                         LocationService.mp.stop();
-                        LocationService.mp.release();
+                        LocationService.mp.reset();
+
                     }
                 }
             }

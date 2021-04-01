@@ -82,7 +82,10 @@ public class LocationService extends Service{
 
                     // This is what sets the media type as alarm
                     // Thus, the sound will be influenced by alarm volume
-                    mp = new MediaPlayer();
+                    if(mp == null)
+                    {
+                        mp = new MediaPlayer();
+                    }
                     mp.setAudioAttributes(new AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_ALARM).build());
 
@@ -96,7 +99,7 @@ public class LocationService extends Service{
                     // To continuously loop the alarm sound
                     mp.setLooping(true);
                     mp.start();
-                    stopLocationService();
+                    Log.v("Play sounds", String.valueOf(123));
                 }
 
 
@@ -106,16 +109,6 @@ public class LocationService extends Service{
                 //((distance/20) * 1000)/2 =
                 refreshTime = (int) (distance*25);
 
-                if(mp != null ? !mp.isPlaying() : false){
-                    stploctemp();
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            strtloctemp();
-                        }
-                    }, refreshTime);
-                }
-
 
                 Log.v("Destination distance", String.valueOf(distance) + " Time/2: " + refreshTime/1000);
 
@@ -123,14 +116,6 @@ public class LocationService extends Service{
         }
     };
 
-    //Maybe a bad way to make update location varying, check this later
-    private void stploctemp(){
-        LocationServices.getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
-    }
-    private void strtloctemp(){
-        locationRequest.setInterval(refreshTime);
-        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-    }
 
     @Nullable
     @Override
