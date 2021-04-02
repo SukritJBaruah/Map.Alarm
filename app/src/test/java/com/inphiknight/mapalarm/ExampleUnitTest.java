@@ -1,4 +1,4 @@
-package com.example.mapalarm;
+package com.inphiknight.mapalarm;
 
 import org.junit.Test;
 

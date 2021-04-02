@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.mapalarm">
+    package="com.inphiknight.mapalarm">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -30,10 +30,10 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="AIzaSyCscg0VExdkkGAY2lsQ-Qs2iViJjuhLNak" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="com.inphiknight.mapalarm.MapsActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,7 +42,7 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".LocationService"
+        <service android:name="com.inphiknight.mapalarm.LocationService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location"/>

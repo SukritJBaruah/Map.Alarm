@@ -1,4 +1,4 @@
-package com.example.mapalarm;
+package com.inphiknight.mapalarm;
 
 
 import android.app.NotificationChannel;
@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.location.Location;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
@@ -26,10 +27,9 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.CircleOptions;
 
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class LocationService extends Service{
 
@@ -42,6 +42,7 @@ public class LocationService extends Service{
 
     private SharedPreferences.Editor edit;
     private SharedPreferences preferenceSettings;
+    private int measureSystem;
 
     private LocationCallback locationCallback = new LocationCallback() {
         @Override
@@ -68,6 +69,13 @@ public class LocationService extends Service{
                 distance = destinationLoc1.distanceTo(currentLoc1);
 
 
+                if(measureSystem == 1){
+                    distance = distance/1000;
+                }else{
+                    if(measureSystem == 2) {
+                        distance = (float) (distance/1609.34);
+                    }
+                }
                 //alarm sound
                 if(distance <= preferenceSettings.getFloat("triggerRadius", 0)){
                     Uri alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
@@ -127,7 +135,7 @@ public class LocationService extends Service{
     private void startLocationService(){
         String channelId = "location_notification_channel";
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent resultIntent = new Intent();
+        Intent resultIntent = new Intent(this, MapsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), channelId);
@@ -152,6 +160,7 @@ public class LocationService extends Service{
         locationRequest = new LocationRequest();
         preferenceSettings = getSharedPreferences("Test", Context.MODE_PRIVATE);
         edit = preferenceSettings.edit();
+        measureSystem = preferenceSettings.getInt("measureSys", 0);
         locationRequest.setInterval((long) preferenceSettings.getFloat("refreshRateLoc", 5000));
         locationRequest.setFastestInterval((long) (preferenceSettings.getFloat("refreshRateLoc", 5000) - 2000));
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);

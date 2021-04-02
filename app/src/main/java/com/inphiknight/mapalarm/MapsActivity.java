@@ -1,4 +1,4 @@
-package com.example.mapalarm;
+package com.inphiknight.mapalarm;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -7,9 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.AlarmManager;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,8 +18,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -85,6 +83,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
 
+        //get the spinner from the xml.
+        Spinner dropdown = findViewById(R.id.spinner1);
+        //create a list of items for the spinner.
+        String[] items = new String[]{"Metres", "Kms", "Miles"};
+        //create an adapter to describe how the items are displayed, adapters are used in several places in android.
+        //There are multiple variations of this, but this is the basic variant.
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
+        //set the spinners adapter to the previously created one.
+        dropdown.setAdapter(adapter);
+        //selection
+        if(preferenceSettings.getInt("measureSys", 0) == 1){
+            dropdown.setSelection(1);
+        }else{
+            if(preferenceSettings.getInt("measureSys", 0) == 2){
+                dropdown.setSelection(2);
+            }
+        }
+
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                edit.putInt("measureSys", position);
+                edit.apply();
+
+                //draw circle
+                if(mapCircle!=null){
+                    mapCircle.remove();
+                }
+
+                if(position == 1){
+                    mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1000).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                }else{
+                    if(position == 2){
+                        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1609.34).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                    }
+                    else{
+                        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         //text space
         triggerRadiusText = (EditText) findViewById(R.id.triggerRadius5);
         triggerRadiusText.setText(String.valueOf(preferenceSettings.getFloat("triggerRadius", 0)));
@@ -112,7 +157,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(mapCircle!=null){
                     mapCircle.remove();
                 }
-                mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+
+                if(preferenceSettings.getInt("measureSys", 0) == 1){
+                    mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1000).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                }else{
+                    if(preferenceSettings.getInt("measureSys", 0) == 2){
+                        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1609.34).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                    }
+                    else{
+                        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                    }
+                }
+
             }
         });
 
@@ -150,19 +206,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-
-
-
-
-        //get the spinner from the xml.
-        Spinner dropdown = findViewById(R.id.spinner1);
-        //create a list of items for the spinner.
-        String[] items = new String[]{"Metres", "Kms", "Miles"};
-        //create an adapter to describe how the items are displayed, adapters are used in several places in android.
-        //There are multiple variations of this, but this is the basic variant.
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items);
-        //set the spinners adapter to the previously created one.
-        dropdown.setAdapter(adapter);
 
 
 
@@ -239,7 +282,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(mapCircle!=null){
             mapCircle.remove();
         }
-        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+        if(preferenceSettings.getInt("measureSys", 0) == 1){
+            mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1000).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+        }else{
+            if(preferenceSettings.getInt("measureSys", 0) == 2){
+                mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1609.34).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+            }
+            else{
+                mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+            }
+        }
 
         //fused location
         client = LocationServices.getFusedLocationProviderClient(this);
@@ -281,7 +333,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 + "Long " + triggerLoc.longitude,
                         Toast.LENGTH_LONG).show();
                 //draw circle
-                mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                if(preferenceSettings.getInt("measureSys", 0) == 1){
+                    mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1000).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                }else{
+                    if(preferenceSettings.getInt("measureSys", 0) == 2){
+                        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius*1609.34).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                    }
+                    else{
+                        mapCircle = mMap.addCircle(new CircleOptions().center(triggerLoc).radius(triggerRadius).strokeColor(Color.RED).fillColor(0x220000FF).strokeWidth(5));
+                    }
+                }
             }
 
             @Override
