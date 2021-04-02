@@ -9,7 +9,7 @@
     android:background="@color/dark">
 
     <TextView
-        android:id="@+id/popupclose"
+        android:id="@+id/popupClose"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:text="X"
@@ -17,15 +17,33 @@
         android:textStyle="bold"
         android:layout_gravity="end"
         android:gravity="center"/>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="top">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Settings not implemented yet"
-            android:textColor="@color/white"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location refresh rate: "
+            android:textColor="@color/white" />
+        <EditText
+            android:id="@+id/refTimeLoc"
+            android:inputType="numberDecimal"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:hint="Default: 5"
+            android:textColor="@color/white"
+            android:textSize="15sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="s"
+            android:textColor="@color/white" />
+
     </LinearLayout>
 
 </LinearLayout>

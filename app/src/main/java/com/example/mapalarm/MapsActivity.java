@@ -54,6 +54,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Circle mapCircle;
     private Float triggerRadius;
     private Marker redMarker;
+    private EditText refLocTime;
 
 
     private EditText triggerRadiusText;
@@ -73,6 +74,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         edit = preferenceSettings.edit();
         triggerLoc = new LatLng(preferenceSettings.getFloat("trigLat", (float) 26.585), preferenceSettings.getFloat("trigLong", (float) 93.168));
 
+        edit.putFloat("refreshRateLoc", (float) 5000);
+        edit.apply();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -312,7 +315,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void ShowPopUp(View v){
         TextView txtclose;
         myDialog.setContentView(R.layout.settings_popup);
-        txtclose = (TextView) myDialog.findViewById(R.id.popupclose);
+        txtclose = (TextView) myDialog.findViewById(R.id.popupClose);
+
+        //text space
+        refLocTime = (EditText) myDialog.findViewById(R.id.refTimeLoc);
+        refLocTime.setText(String.valueOf(preferenceSettings.getFloat("refreshRateLoc", (float) 5000)/1000));
+        refLocTime.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().equals("")) {
+                    edit.putFloat("refreshRateLoc", (float) 5000);
+                }else{
+                    edit.putFloat("refreshRateLoc", Float.parseFloat(s.toString())*1000);
+                }
+                edit.apply();
+            }
+        });
 
         txtclose.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -324,6 +350,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         myDialog.setCanceledOnTouchOutside(false);
         myDialog.setCancelable(false);
         myDialog.show();
+
+
     }
 
 }

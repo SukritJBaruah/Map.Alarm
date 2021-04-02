@@ -34,7 +34,7 @@ import java.util.TimerTask;
 public class LocationService extends Service{
 
     private float distance;
-    private int refreshTime = 5000;
+    //private int refreshTime = 5000;
     private Location destinationLoc1 = new Location("");
     private Location currentLoc1 = new Location("");
     private LocationRequest locationRequest;
@@ -107,10 +107,10 @@ public class LocationService extends Service{
 
                 //distance/speed in m/s
                 //((distance/20) * 1000)/2 =
-                refreshTime = (int) (distance*25);
+                //refreshTime = (int) (distance*25);
 
 
-                Log.v("Destination distance", String.valueOf(distance) + " Time/2: " + refreshTime/1000);
+                Log.v("Destination distance", String.valueOf(distance));
 
             }
         }
@@ -150,8 +150,10 @@ public class LocationService extends Service{
         }
 
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(refreshTime);
-        locationRequest.setFastestInterval(refreshTime - 2000);
+        preferenceSettings = getSharedPreferences("Test", Context.MODE_PRIVATE);
+        edit = preferenceSettings.edit();
+        locationRequest.setInterval((long) preferenceSettings.getFloat("refreshRateLoc", 5000));
+        locationRequest.setFastestInterval((long) (preferenceSettings.getFloat("refreshRateLoc", 5000) - 2000));
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
