@@ -94,20 +94,22 @@ public class LocationService extends Service{
                     {
                         mp = new MediaPlayer();
                     }
-                    mp.setAudioAttributes(new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM).build());
+                    if(!mp.isPlaying()){
+                        mp.setAudioAttributes(new AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ALARM).build());
 
-                    try {
-                        mp.setDataSource(getApplicationContext(), alarmUri);
-                        mp.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        try {
+                            mp.setDataSource(getApplicationContext(), alarmUri);
+                            mp.prepare();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        // To continuously loop the alarm sound
+                        mp.setLooping(true);
+                        mp.start();
+                        Log.v("Play sounds", String.valueOf(123));
                     }
-
-                    // To continuously loop the alarm sound
-                    mp.setLooping(true);
-                    mp.start();
-                    Log.v("Play sounds", String.valueOf(123));
                 }
 
 
