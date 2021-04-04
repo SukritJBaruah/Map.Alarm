@@ -18,4 +18,5 @@ How to use:<br />
 <br />
 The blue marker shows your approximate location<br />
 <br />
+Turn the alarm on.<br />
 Now minimize the app and let it run in the background. When you reach your destination (within the red marker radius) the alarm should start ringing.<br />
