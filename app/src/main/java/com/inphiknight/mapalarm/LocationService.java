@@ -108,7 +108,7 @@ public class LocationService extends Service{
                         // To continuously loop the alarm sound
                         mp.setLooping(true);
                         mp.start();
-                        Log.v("Play sounds", String.valueOf(123));
+                        //Log.v("Play sounds", String.valueOf(123));
                     }
                 }
 
@@ -120,7 +120,7 @@ public class LocationService extends Service{
                 //refreshTime = (int) (distance*25);
 
 
-                Log.v("Destination distance", String.valueOf(distance));
+                //Log.v("Destination distance", String.valueOf(distance));
 
             }
         }
