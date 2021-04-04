@@ -14,8 +14,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -43,6 +47,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
+import java.util.Calendar;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -217,9 +223,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(currentLoc).title("I'm here").draggable(false).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 10));
+                //last location not older than 30 secs
+                if(location != null && location.getTime() > Calendar.getInstance().getTimeInMillis() - 30 * 1000){
+                    currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.addMarker(new MarkerOptions().position(currentLoc).title("I'm here").draggable(false).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 10));
+                }
+                else{
+                    LocationListener locationListener = new LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            currentLoc = new LatLng(location.getLatitude(), location.getLongitude());
+                            mMap.addMarker(new MarkerOptions().position(currentLoc).title("I'm here").draggable(false).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLoc, 10));
+                        }
+
+                        @Override
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+                        }
+
+                        @Override
+                        public void onProviderEnabled(String provider) {
+                        }
+
+                        @Override
+                        public void onProviderDisabled(String provider) {
+                        }
+                    };
+
+                    // Now first make a criteria with your requirements
+                    // this is done to save the battery life of the device
+                    // there are various other other criteria you can search for..
+                    Criteria criteria = new Criteria();
+                    criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+                    criteria.setPowerRequirement(Criteria.POWER_LOW);
+                    criteria.setAltitudeRequired(false);
+                    criteria.setBearingRequired(false);
+                    criteria.setSpeedRequired(false);
+                    criteria.setCostAllowed(true);
+                    criteria.setHorizontalAccuracy(Criteria.ACCURACY_HIGH);
+                    criteria.setVerticalAccuracy(Criteria.ACCURACY_HIGH);
+
+                    // Now create a location manager
+                    final LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+
+                    // This is the Best And IMPORTANT part
+                    final Looper looper = null;
+
+                    locationManager.requestSingleUpdate(criteria, locationListener, looper);
+                }
 
             }
         });
