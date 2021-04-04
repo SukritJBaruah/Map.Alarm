@@ -142,7 +142,7 @@ public class LocationService extends Service{
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), channelId);
 
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setSmallIcon(R.mipmap.mapalarm_icon);
         builder.setContentText("Location Service");
         builder.setDefaults(NotificationCompat.DEFAULT_ALL);
         builder.setContentText("Location Alarm is Running");
