@@ -5,7 +5,7 @@ Alarm based on location of map<br />
 ![Alt text](Screenshot_1.png?raw=true "Screenshot 2")<br />
 
 Thing to do before using the app:<br />
--Enable location in settings/dropdown medu<br />
+-Enable location in settings/dropdown menu<br />
 -Set an alarm ringtone<br />
 -Allow location permission for the app<br />
 <br />
