@@ -30,7 +30,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCscg0VExdkkGAY2lsQ-Qs2iViJjuhLNak" />
+            android:value="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
 
         <activity
             android:name="com.inphiknight.mapalarm.MapsActivity"
