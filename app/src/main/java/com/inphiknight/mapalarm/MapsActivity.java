@@ -150,7 +150,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().equals("")) {
+                if (s.toString().equals("") || s.toString().equals(".")) {
                     triggerRadius = (float) 0;
                 }else{
                     triggerRadius = Float.parseFloat(s.toString());
@@ -444,7 +444,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s.toString().equals("")) {
+                if (s.toString().equals("") || s.toString().equals(".")) {
                     edit.putFloat("refreshRateLoc", (float) 5000);
                 }else{
                     edit.putFloat("refreshRateLoc", Float.parseFloat(s.toString())*1000);
